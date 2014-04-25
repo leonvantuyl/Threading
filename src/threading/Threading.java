@@ -4,6 +4,9 @@
  */
 package threading;
 
+import Model.fileReaderThread;
+import java.io.File;
+
 /**
  *
  * @author Legopiraat
@@ -16,6 +19,8 @@ public class Threading
      */
     public static void main(String[] args)
       {
-        // TODO code application logic here
+        File file = new File("C://bestanden.txt");
+        
+        (new Thread (new fileReaderThread(file))).start();
       }
   }
