@@ -11,12 +11,12 @@ import java.util.logging.Logger;
 
 public class fileReaderThread implements Runnable
   {
-    private File file;
     private int count = 0;
+    private String fileUrl;
     
-    public fileReaderThread(File file)
+    public fileReaderThread(String url)
       {
-        this.file = file;
+        this.fileUrl = url;
       }
 
     @Override
@@ -38,7 +38,7 @@ public class fileReaderThread implements Runnable
     
     private void readFile() throws FileNotFoundException, IOException
       {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
+        BufferedReader reader = new BufferedReader(new FileReader(fileUrl));
         String line;
         
         while((line = reader.readLine()) != null)
