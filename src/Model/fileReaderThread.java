@@ -1,7 +1,6 @@
 package Model;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,12 +10,15 @@ import java.util.logging.Logger;
 
 public class fileReaderThread implements Runnable
   {
+
     private int count = 0;
-    private String fileUrl;
-    
-    public fileReaderThread(String url)
+    private final String fileUrl;
+    private final Top10 top10;
+
+    public fileReaderThread(String url, Top10 top10)
       {
         this.fileUrl = url;
+        this.top10 = top10;
       }
 
     @Override
@@ -35,19 +37,19 @@ public class fileReaderThread implements Runnable
             Logger.getLogger(fileReaderThread.class.getName()).log(Level.SEVERE, null, ex);
           }
       }
-    
+
     private void readFile() throws FileNotFoundException, IOException
       {
         BufferedReader reader = new BufferedReader(new FileReader(fileUrl));
         String line;
-        
-        while((line = reader.readLine()) != null)
+
+        while ((line = reader.readLine()) != null)
           {
             try
               {
                 final byte[] bytes = line.getBytes("UTF-8");
 
-                if(bytes.length == 42)
+                if (bytes.length == 42)
                   {
                     count++;
                   }
@@ -57,7 +59,9 @@ public class fileReaderThread implements Runnable
                 Logger.getLogger(fileReaderThread.class.getName()).log(Level.SEVERE, null, ex);
               }
           }
-        System.out.println(count);
-        
+        if (count > 0)
+          {
+            this.top10.addResult(fileUrl, count);
+          }
       }
   }
