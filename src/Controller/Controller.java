@@ -7,9 +7,11 @@ package Controller;
 import Model.Top10;
 import Model.fileReaderThread;
 import View.View;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -17,8 +19,10 @@ import java.io.FileReader;
  */
 public class Controller
   {
+
     private View view;
-    private Top10 top10;
+    private final Top10 top10;
+    private final ArrayList<File> files = new ArrayList<>();
 
     public Controller()
       {
@@ -27,21 +31,67 @@ public class Controller
 
     public void readFile()
       {
-        File file = new File("C://bestanden.txt");
+        // File file = new File("C://bestanden.txt");
 
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+        for (File file : files)
+          {
+            try
+              {
+                Runnable fileReaderThread = new fileReaderThread(file.toString(), top10);
+                executor.submit(fileReaderThread);
+              }
+            catch (Exception e)
+              {
+                System.err.println(e);
+              }
+          }
+        executor.shutdown();
+        while (!executor.isTerminated())
+          {
+          }
+        printTop10();
+      }
+
+    public void choiceFile()
+      {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new java.io.File("."));
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        if (chooser.showOpenDialog(view) == JFileChooser.APPROVE_OPTION)
+          {
+            File folder = chooser.getSelectedFile();
+            fileListCreator(folder, files);
+          }
+      }
+
+    public void fileListCreator(File directoryName, ArrayList<File> files)
+      {
+        File directory = directoryName;
+
+        // try to get all files from the folder
         try
           {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
+            File[] fList = directory.listFiles();
 
-            while ((line = reader.readLine()) != null)
+            for (File file : fList)
               {
-                (new Thread(new fileReaderThread(line, top10))).start();
+                if (file.isFile())
+                  {
+                    files.add(file);
+                  }
+                else if (file.isDirectory())
+                  {
+                    fileListCreator(file, files);
+                  }
               }
           }
         catch (Exception e)
           {
-            System.err.println(e);
+            System.out.println(e);
           }
       }
 
